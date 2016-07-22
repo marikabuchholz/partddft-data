@@ -41,8 +41,8 @@ def createDirs(prefix, pwdir, tddir, nproc, methods):
 
 if __name__ == '__main__':
     prefix = 'graphene'
-    pwdir = '/home/rehnd/espresso/PW/bin'
-    tddir = '/home/rehnd/espresso/ce-tddft/bin'
+    pwdir = '/home/rehnd/espresso/bin'
+    tddir = '/home/rehnd/espresso/ce-tddft/src'
     pseudodir = '/home/rehnd/espresso/pseudo'
 
     methods = ['cn']
