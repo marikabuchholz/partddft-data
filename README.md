@@ -9,7 +9,7 @@ this to see how it is working.
 
 To run, type:
 
-   python setup.py default
+   `$ python setup.py default`
 
-Eventually we will add more functions so that setup.py can take more
+Eventually we will add more functions so that `setup.py` can take more
 command-line arguments than just 'default'
