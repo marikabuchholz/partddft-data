@@ -1,32 +1,59 @@
 import os
 import sys
-import qeinput
-import qesetup
 import numpy
-import math
+
+import input_files
+
+
+
+def createDirs(prefix, pwdir, tddir, nproc, methods):
+    for np in nproc:
+        # Create directory
+        npdir = 'np%02d'% np
+        os.system('mkdir ' + npdir)
+
+        # Create .sbatch file
+        sbstr = input_files.getsbatch(np, pwdir, tddir)
+        f = open(npdir + '/tddft.sbatch', 'w')
+        f.write(sbstr)
+        f.close()
+        os.system('chmod u+rwx ' + npdir + '/tddft.sbatch')
+
+        # Create .tddft-in file
+        #      For now define dt, nstep conv_threshold right here
+        dt = 0.5
+        nstep = 10
+        conv_threshold = 1e-10
+        tdstr = input_files.gettdfile(prefix, dt, nstep, conv_threshold)
+
+        f = open(npdir + '/' + prefix + '.tddft-in', 'w')
+        f.write(tdstr)
+        f.close()
+
+        # Create .pw-in file
+        pwstr = input_files.getpw16at(pseudodir)
+        f = open(npdir + '/' + prefix + '.pw-in', 'w')
+        f.write(pwstr)
+        f.close()
+        
+    return 0
 
 
 if __name__ == '__main__':
     prefix = 'graphene'
-    pwbindir = '/home/rehnd/qe-tddft/bin'
-    tdbindir = '/home/rehnd/qe-tddft/multi-k-tddft/bin'
-    pseudodir = '/home/rehnd/qe-tddft/pseudo'
-    nat = [4]
-    nks = [1]
-    #dts = [2.**-10, 2.**-9, 2.**-8, 2.**-7, 2.**-6, 2.**-5, 2.**-4, 2.**-3, 0.25, 0.5, 1.0, 2.0, 4.0]
-    dts = [2.**-5, 2.**-4, 2.**-3, 0.25, 0.5, 1.0, 2.0, 4.0]
-    methods = ['rk4', 'rk54', 'rk53']
-    runtime = 500
+    pwdir = '/home/rehnd/espresso/PW/bin'
+    tddir = '/home/rehnd/espresso/ce-tddft/bin'
+    pseudodir = '/home/rehnd/espresso/pseudo'
+
+    methods = ['cn']
+    nproc = [2]#[1, 2, 4, 8, 16, 32]
+
 
     if len(sys.argv) > 1:
         if sys.argv[1] == 'default':
-            qesetup.setupall(prefix, pwbindir, tdbindir, pseudodir, nat, nks, dts, methods, runtime)
-        elif sys.argv[1] == 'serial':
-            qesetup.runserial(nat, nks, dts, methods)
-        elif sys.argv[1] == 'parallel':
-            qesetup.runparallel(nat, nks, dts, methods)
+            createDirs(prefix, pwdir, tddir, nproc, methods)
+        if sys.argv[1] == 'parallel':
+            runparallel(prefix, pwdir, tddir, nproc, methods)
     else:
-        print("Usage:\n\tpython setup.py <option> <number>")
-        print("\t\t<option> = default, remove, newdir, serial, or parallel")
-        print("\t\t<number> = atom # directories to remove or newdir (ONLY valid for remove, newdir)")
-        print("\t\t           use 'all' to delete all atom folders")
+        print("Usage:\n\tpython setup.py <option>")
+        print("\t\t<option> = default, parallel")
